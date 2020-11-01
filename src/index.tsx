@@ -11,30 +11,20 @@ import {
 import initialData from './initial-data';
 import Column from './Components/Column';
 import styled from 'styled-components';
+import InnerColumnList from './Components/InnerColumnList';
 
 const Container = styled.div`
   display: flex;
 `;
 
 const Kanban = () => {
-  const [state, setState] = useState<
-    {
-      homeIndex: number | null;
-    } & InitialData
-  >({ homeIndex: null, ...initialData });
+  const [state, setState] = useState<InitialData>(initialData);
 
-  const onDragStart = (start: DragStart) => {
-    // With this logic we can avoid to move back an item
-    // const homeIndex = state.columnOrder.indexOf(start.source.droppableId);
-    // setState({ ...state, homeIndex });
-  };
+  const onDragStart = (start: DragStart) => {};
 
   const onDragUpdate = (update: DragUpdate) => {};
 
   const onDragEnd = (result: DropResult) => {
-    // With this logic we can avoid to move back an item
-    // setState({ ...state, homeIndex: null });
-
     const { destination, source, draggableId, type } = result;
 
     // We check if we are not dropping the item into a non valid area
@@ -123,25 +113,18 @@ const Kanban = () => {
       onDragEnd={onDragEnd} // onDragEnd is required always
     >
       <Droppable droppableId="all-columns" direction="horizontal" type="column">
-        {(provided, snapshot) => {
+        {(provided) => {
           return (
             <Container {...provided.droppableProps} ref={provided.innerRef}>
               {state.columnOrder.map((columnId, index) => {
                 const column = state.columns[columnId];
-                const tasks = column.taskIds.map(
-                  (taskId) => state.tasks[taskId]
-                );
-
-                // const isDropDisabled =
-                //   !!state.homeIndex && index < state.homeIndex;
 
                 return (
-                  <Column
+                  <InnerColumnList
                     index={index}
-                    // isDropDisabled={isDropDisabled}
                     key={column.id}
                     column={column}
-                    tasks={tasks}
+                    taskMap={state.tasks}
                   />
                 );
               })}

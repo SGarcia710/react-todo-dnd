@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import Task from './Task';
 import { Droppable, Draggable } from 'react-beautiful-dnd';
+import InnerList from './InnerList';
 
 const Container = styled.div`
   margin: 8px;
@@ -19,7 +20,7 @@ const TaskList = styled.div<{ isDraggingOver: boolean }>`
   padding: 8px;
   transition: background-color 0.2s ease;
   background-color: ${(props) =>
-    props.isDraggingOver ? 'skyblue' : 'inherit'};
+    props.isDraggingOver ? 'lightgrey' : 'inherit'};
 
   flex-grow: 1;
 
@@ -29,7 +30,6 @@ const TaskList = styled.div<{ isDraggingOver: boolean }>`
 interface IColumn {
   column: Column;
   tasks: Task[];
-  // isDropDisabled: boolean;
   index: number;
 }
 
@@ -41,21 +41,14 @@ const Column = (props: IColumn) => {
           <Container {...provided.draggableProps} ref={provided.innerRef}>
             <Title {...provided.dragHandleProps}>{props.column.title}</Title>
 
-            <Droppable
-              // type={props.column.id === 'column-3' ? 'done' : 'active'}
-              // isDropDisabled={props.isDropDisabled}
-              droppableId={props.column.id}
-              type="task"
-            >
+            <Droppable droppableId={props.column.id} type="task">
               {(provided, snapshot) => (
                 <TaskList
                   isDraggingOver={snapshot.isDraggingOver}
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                 >
-                  {props.tasks.map((task, index) => (
-                    <Task index={index} key={task.id} task={task} />
-                  ))}
+                  <InnerList tasks={props.tasks} />
                   {provided.placeholder}
                 </TaskList>
               )}
