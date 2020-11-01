@@ -6,6 +6,7 @@ import {
   DragStart,
   DragUpdate,
   DropResult,
+  Droppable,
 } from 'react-beautiful-dnd';
 import initialData from './initial-data';
 import Column from './Components/Column';
@@ -16,14 +17,25 @@ const Container = styled.div`
 `;
 
 const Kanban = () => {
-  const [state, setState] = useState(initialData);
+  const [state, setState] = useState<
+    {
+      homeIndex: number | null;
+    } & InitialData
+  >({ homeIndex: null, ...initialData });
 
-  const onDragStart = (start: DragStart) => {};
+  const onDragStart = (start: DragStart) => {
+    // With this logic we can avoid to move back an item
+    // const homeIndex = state.columnOrder.indexOf(start.source.droppableId);
+    // setState({ ...state, homeIndex });
+  };
 
   const onDragUpdate = (update: DragUpdate) => {};
 
   const onDragEnd = (result: DropResult) => {
-    const { destination, source, draggableId } = result;
+    // With this logic we can avoid to move back an item
+    // setState({ ...state, homeIndex: null });
+
+    const { destination, source, draggableId, type } = result;
 
     // We check if we are not dropping the item into a non valid area
     if (!destination) {
@@ -35,6 +47,19 @@ const Kanban = () => {
       destination.droppableId === source.droppableId &&
       destination.index === source.index
     ) {
+      return;
+    }
+
+    if (type === 'column') {
+      const newColumnOrder = Array.from(state.columnOrder);
+      newColumnOrder.splice(source.index, 1);
+      newColumnOrder.splice(destination.index, 0, draggableId);
+
+      const newState = {
+        ...state,
+        columnOrder: newColumnOrder,
+      };
+      setState(newState);
       return;
     }
 
@@ -97,14 +122,34 @@ const Kanban = () => {
       onDragUpdate={onDragUpdate}
       onDragEnd={onDragEnd} // onDragEnd is required always
     >
-      <Container>
-        {state.columnOrder.map((columnId) => {
-          const column = state.columns[columnId];
-          const tasks = column.taskIds.map((taskId) => state.tasks[taskId]);
+      <Droppable droppableId="all-columns" direction="horizontal" type="column">
+        {(provided, snapshot) => {
+          return (
+            <Container {...provided.droppableProps} ref={provided.innerRef}>
+              {state.columnOrder.map((columnId, index) => {
+                const column = state.columns[columnId];
+                const tasks = column.taskIds.map(
+                  (taskId) => state.tasks[taskId]
+                );
 
-          return <Column key={column.id} column={column} tasks={tasks} />;
-        })}
-      </Container>
+                // const isDropDisabled =
+                //   !!state.homeIndex && index < state.homeIndex;
+
+                return (
+                  <Column
+                    index={index}
+                    // isDropDisabled={isDropDisabled}
+                    key={column.id}
+                    column={column}
+                    tasks={tasks}
+                  />
+                );
+              })}
+              {provided.placeholder}
+            </Container>
+          );
+        }}
+      </Droppable>
     </DragDropContext>
   );
 };

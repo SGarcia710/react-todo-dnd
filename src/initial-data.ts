@@ -1,8 +1,4 @@
-const initialData: {
-  tasks: Record<string, Task>;
-  columns: Record<string, Column>;
-  columnOrder: string[];
-} = {
+const initialData: InitialData = {
   tasks: {
     'task-1': {
       id: 'task-1',

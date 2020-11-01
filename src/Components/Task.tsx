@@ -4,6 +4,7 @@ import { Draggable } from 'react-beautiful-dnd';
 
 interface IContainer {
   isDragging: boolean;
+  isDragDisabled: boolean;
 }
 
 const Container = styled.div<IContainer>`
@@ -12,7 +13,12 @@ const Container = styled.div<IContainer>`
   padding: 8px;
   margin-bottom: 8px;
   transition: background-color 0.2s ease;
-  background-color: ${(props) => (props.isDragging ? 'lightgreen' : 'white')};
+  background-color: ${(props) =>
+    props.isDragDisabled
+      ? 'lightgrey'
+      : props.isDragging
+      ? 'lightgreen'
+      : 'white'};
 `;
 
 interface ITask {
@@ -21,8 +27,13 @@ interface ITask {
 }
 
 const Task = (props: ITask) => {
+  const isDragDisabled = props.task.id === 'task-1';
   return (
-    <Draggable draggableId={props.task.id} index={props.index}>
+    <Draggable
+      isDragDisabled={isDragDisabled}
+      draggableId={props.task.id}
+      index={props.index}
+    >
       {(provided, snapshot) => {
         return (
           <Container
@@ -31,6 +42,7 @@ const Task = (props: ITask) => {
             {...provided.draggableProps}
             ref={provided.innerRef}
             isDragging={snapshot.isDragging}
+            isDragDisabled={isDragDisabled}
           >
             {props.task.content}
           </Container>
